@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import nodemailer, { Transporter } from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport/index.js';
 import type { IMailService } from '../../common/interfaces/mail.interface.js';
 
 @Injectable()
@@ -19,15 +20,18 @@ export class VerificationEmailService implements IMailService {
 
     if (!host || !port || !user || !pass) return null;
 
-    this.transport = nodemailer.createTransport({
+    const transportOptions: SMTPTransport.Options & { family: 4 } = {
       host,
       port: Number(port),
       secure: Number(port) === 465,
       auth: { user, pass },
+      family: 4,
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
-    });
+    };
+
+    this.transport = nodemailer.createTransport(transportOptions);
 
     return this.transport;
   }
