@@ -6,7 +6,7 @@ import { AuthService } from './dto/auth.service.js';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy.js';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy.js';
 import { UserModule } from '../user/user.module.js';
-import { VerificationEmailService } from './mail/verification-email.service.js';
+import { ResendMailService } from './mail/resend-mail.service.js';
 import { TokenService } from './token.service.js';
 import { MAIL_SERVICE } from '../common/interfaces/mail.interface.js';
 
@@ -18,8 +18,8 @@ import { MAIL_SERVICE } from '../common/interfaces/mail.interface.js';
         TokenService,
         JwtAccessStrategy,
         JwtRefreshStrategy,
-        VerificationEmailService,
-        { provide: MAIL_SERVICE, useExisting: VerificationEmailService },
+        ResendMailService,
+        { provide: MAIL_SERVICE, useExisting: ResendMailService },
     ],
 })
 export class AuthModule { }
