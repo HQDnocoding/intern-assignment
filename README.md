@@ -96,7 +96,8 @@ ONBOARDING_EXPIRES_IN="1d"
 FRONTEND_URL="http://localhost:5173"
 BACKEND_URL="http://localhost:3000"
 
-MAIL_FROM_EMAIL="your-email@example.com"
+RESEND_API_KEY="your-resend-api-key"
+MAIL_FROM_EMAIL="onboarding@your-domain.com"
 MAIL_FROM_NAME="Acme Demo"
 
 CLOUDINARY_CLOUD_NAME="your-cloud-name"
@@ -144,6 +145,14 @@ node --loader ts-node/esm prisma/seed.ts
 - Onboarding is required before accessing protected app screens.
 - Organizations currently use a single-owner model.
 - Dashboard data is mock analytics data returned by the backend.
+
+## Assumptions and Trade-offs
+
+- The app uses JWT tokens stored on the client for a simpler demo implementation. This keeps the auth flow straightforward, but is less robust than cookie approach for production.
+- Organizations currently use a single-owner model. This reduces backend and UI complexity, but advanced collaboration features such as memberships, roles, and invitations are not included.
+- Dashboard analytics are seeded and mock data designed to support the required screens and interactions. This keeps the assignment focused on product flow and UI, but the metrics are not connected to a real analytics pipeline.
+- Email verification is handled through Resend. This avoids SMTP networking issues during deployment, but it requires a verified sending domain in order to work in production.
+- The onboarding flow continues directly from email verification into profile setup, then into the app without forcing the user to log in again. This improves UX, but adds a custom onboarding token flow that would need extra hardening in a production system.
 
 ---
 
