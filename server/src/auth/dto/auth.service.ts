@@ -102,14 +102,23 @@ export class AuthService {
             data: { emailVerified: true },
         });
 
-        return { message: 'Email verified', userId: user.id, email: user.email };
+        return {
+            message: 'Email verified',
+            userId: user.id,
+            email: user.email,
+            onboardingCompleted: user.onboardingCompleted,
+        };
     }
 
     async verifyEmailAndRedirect(token: string, callbackURL?: string) {
         const verified = await this.verifyEmail(token);
-        const onboardingToken = this.tokenService.issueOnboardingToken(verified.userId, verified.email);
-
         const frontendUrl = this.getFrontendUrl();
+
+        if (verified.onboardingCompleted) {
+            return new URL('/dashboard', frontendUrl).toString();
+        }
+
+        const onboardingToken = this.tokenService.issueOnboardingToken(verified.userId, verified.email);
         const safeCallbackURL =
             callbackURL && callbackURL.startsWith('/') ? callbackURL : '/dashboard/onboarding?redirectTo=%2Fdashboard';
         const redirectUrl = new URL(safeCallbackURL, frontendUrl);

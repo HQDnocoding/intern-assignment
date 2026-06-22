@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { resolve4 } from 'node:dns/promises';
 import nodemailer, { Transporter } from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport/index.js';
 import type { IMailService } from '../../common/interfaces/mail.interface.js';
 
 @Injectable()
@@ -11,7 +9,7 @@ export class VerificationEmailService implements IMailService {
 
   constructor(private readonly config: ConfigService) { }
 
-  private async getOrCreateTransport(): Promise<Transporter | null> {
+  private getOrCreateTransport(): Transporter | null {
     if (this.transport) return this.transport;
 
     const host = this.config.get<string>('SMTP_HOST');
@@ -21,20 +19,15 @@ export class VerificationEmailService implements IMailService {
 
     if (!host || !port || !user || !pass) return null;
 
-    const [ipv4Host] = await resolve4(host);
-
-    const transportOptions: SMTPTransport.Options = {
-      host: ipv4Host ?? host,
+    this.transport = nodemailer.createTransport({
+      host,
       port: Number(port),
       secure: Number(port) === 465,
       auth: { user, pass },
-      tls: { servername: host },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
-    };
-
-    this.transport = nodemailer.createTransport(transportOptions);
+    });
 
     return this.transport;
   }
@@ -120,7 +113,7 @@ export class VerificationEmailService implements IMailService {
     const callbackURL = '/dashboard/onboarding?redirectTo=%2Fdashboard';
     const params = new URLSearchParams({ token, callbackURL });
     const verifyUrl = `${this.getBackendUrl()}/auth/verify-email?${params.toString()}`;
-    const transport = await this.getOrCreateTransport();
+    const transport = this.getOrCreateTransport();
 
     if (!transport) {
       console.log(`[VERIFY EMAIL] To: ${email}`);

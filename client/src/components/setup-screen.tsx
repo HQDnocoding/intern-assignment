@@ -4,7 +4,7 @@ import { centerCrop, makeAspectCrop, type Crop, type PixelCrop } from "react-ima
 import { toast } from "sonner"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/stores/auth-store"
-import type { MeResponse } from "@/lib/types"
+import type { AuthResponse, MeResponse } from "@/lib/types"
 import { cropImage } from "@/components/setup/setup-image"
 import { SetupVerifyCard } from "@/components/setup/setup-verify-card"
 import { SetupProfileForm } from "@/components/setup/setup-profile-form"
@@ -14,6 +14,7 @@ export function SetupScreen() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const user = useAuthStore((state) => state.user)
+  const setSession = useAuthStore((state) => state.setSession)
   const setUser = useAuthStore((state) => state.setUser)
   const signOut = useAuthStore((state) => state.signOut)
   const imgRef = useRef<HTMLImageElement | null>(null)
@@ -28,6 +29,8 @@ export function SetupScreen() {
   const [isCropping, setIsCropping] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const redirectTo = searchParams.get("redirectTo") ?? "/dashboard"
+  const onboardingToken = searchParams.get("onboardingToken")
+  const isPublicOnboarding = Boolean(onboardingToken && !user)
   const verified = searchParams.get("verified") === "1"
 
   useEffect(() => {
@@ -113,7 +116,7 @@ export function SetupScreen() {
   }
 
   async function onContinue() {
-    if (!user) {
+    if (!user && !onboardingToken) {
       navigate("/signin", { replace: true })
       return
     }
@@ -130,6 +133,10 @@ export function SetupScreen() {
         await api.patch("/me", formData)
         const meResponse = await api.get<MeResponse>("/me")
         setUser(meResponse.data)
+      } else if (onboardingToken) {
+        formData.append("onboardingToken", onboardingToken)
+        const response = await api.post<AuthResponse>("/auth/complete-onboarding", formData)
+        setSession(response.data)
       }
 
       navigate(redirectTo.startsWith("/") ? redirectTo : "/dashboard", { replace: true })
@@ -143,7 +150,7 @@ export function SetupScreen() {
     }
   }
 
-  if (!user) {
+  if (!user && !isPublicOnboarding) {
     return <SetupVerifyCard verified={verified} onSignIn={() => navigate("/signin", { replace: true })} />
   }
 
