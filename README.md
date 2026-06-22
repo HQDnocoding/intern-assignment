@@ -2,6 +2,11 @@
 
 A full-stack authentication and dashboard app built for the intern assignment. The project includes sign up, sign in, email verification, onboarding, organization management, and a protected analytics dashboard.
 
+## Live Demo
+
+- Frontend demo: https://intern-assignment-alpha-puce.vercel.app/
+- Demo video: https://drive.google.com/file/d/1qx9KFq-_Cl8I6HUMhjpD7AKs-9RQGKfV/view?usp=drive_link
+
 ## Tech Stack
 
 - Frontend: React, Vite, TypeScript
@@ -13,6 +18,14 @@ A full-stack authentication and dashboard app built for the intern assignment. T
 - Auth: JWT access and refresh tokens, Passport
 - Uploads: Cloudinary
 - Email: verification email service
+
+## Deployment
+
+- Frontend: Vercel
+- Backend API: Render
+- Database: Supabase Postgres
+- Email delivery: Resend
+- File uploads: Cloudinary
 
 ## Features
 
