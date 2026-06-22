@@ -24,6 +24,9 @@ export class VerificationEmailService implements IMailService {
       port: Number(port),
       secure: Number(port) === 465,
       auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
 
     return this.transport;
@@ -118,12 +121,17 @@ export class VerificationEmailService implements IMailService {
       return;
     }
 
-    await transport.sendMail({
-      from: this.getFromAddress(),
-      to: email,
-      subject: 'Verify email address',
-      text: this.buildText(name, verifyUrl),
-      html: this.buildHtml(name, verifyUrl),
-    });
+    try {
+      await transport.sendMail({
+        from: this.getFromAddress(),
+        to: email,
+        subject: 'Verify email address',
+        text: this.buildText(name, verifyUrl),
+        html: this.buildHtml(name, verifyUrl),
+      });
+    } catch (error) {
+      console.error('[VERIFY EMAIL] Failed to send verification email', error);
+      throw error;
+    }
   }
 }
